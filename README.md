@@ -48,4 +48,4 @@ app.js       焊缝示意与交互逻辑
 
 ## License
 
-MIT License，详见 [LICENSE](LICENSE)。
+本项目采用 [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0)。仅允许非商业用途；商业使用需要另行取得许可。详见 [LICENSE](LICENSE)。
