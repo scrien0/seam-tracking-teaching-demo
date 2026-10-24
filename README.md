@@ -8,6 +8,7 @@
 - 调整工件横向/纵向偏移和旋转角度
 - 在一张融合俯视图中同时显示工件、焊缝路径、红色激光扫描线和修正轨迹
 - 演示截面采集、特征点提取、坐标转换与路径修正
+- 附带可处理激光条纹图像的 Python/OpenCV 算法：预处理、亚像素中心线、V 形坡口底端和搭接台阶拐点检测
 - 纯静态网页，无需安装依赖、构建工具或连接设备
 
 ## 几何说明
@@ -25,6 +26,27 @@
 2. 确认 `index.html`、`style.css` 和 `app.js` 位于同一文件夹。
 3. 双击 `index.html`，使用 Edge 或 Chrome 打开。无需联网或安装软件。
 
+## 图像处理算法
+
+`vision_algorithms.py` 提供可直接调用的图像处理函数。它先按 ROI 裁剪并用高斯滤波降噪，再以逐列相对阈值生成激光条纹掩膜；随后用灰度重心法计算亚像素中心线，并通过连续性约束抑制跳点。
+
+- `preprocess_laser_stripe`：灰度化、ROI、滤波和二值掩膜。
+- `extract_centerline`：沿图像列提取激光条纹亚像素中心线。
+- `detect_v_groove_bottom`：对 V 形两侧分段拟合直线，以交点作为坡口根部候选。
+- `detect_lap_step_corner`：在中心线上检测搭接截面的高度突变点。
+- `pixel_to_robot_xy`：用已标定的 3×3 单应矩阵将像素点映射到机器人平面坐标。
+- `draw_algorithm_overlay`：绘制中心线和检测到的特征点，方便检查。
+
+安装可选依赖后，可对相机采集图像运行示例：
+
+```bash
+python -m pip install -r requirements-vision.txt
+python examples/run_vision_algorithms.py path/to/laser-image.png --feature v-groove --roi 100 50 500 300
+python examples/run_vision_algorithms.py path/to/laser-image.png --feature lap-step
+```
+
+算法输出的是图像中的特征候选点。实际效果取决于曝光、反光、遮挡、扫描视角和 ROI；`confidence` 是用于比较候选结果的启发式分数，不是概率。接入机器人前还需完成相机/传感器标定、手眼标定、坐标系转换和安全验证。
+
 ## 课堂建议
 
 1. 选择焊缝类型，引导读者识别可能用于跟踪的边缘、交点或中心特征。
@@ -34,7 +56,7 @@
 
 ## 范围与限制
 
-这是概念演示，不是焊缝图像处理算法，也不与 ABB1410、机器人控制器、英莱相机或焊机通信。工件、扫描线、截面和路径均为示意；偏移值不代表真实标定精度或控制性能。接入真实设备前，需要确认设备接口、跟踪启停方式、工具/工件坐标系、坐标变换和安全联锁，并由设备负责人审核验证。
+网页部分是概念演示，不与 ABB1410、机器人控制器、英莱相机或焊机通信。Python 模块提供基础图像算法示例，不包含厂商设备接口、实时跟踪控制、手眼标定或安全联锁。网页中的工件、扫描线、截面和路径均为示意；图像算法需要用实际相机图像调整参数。接入设备前，应完成标定与坐标系验证，并由设备负责人审核安全联锁。
 
 几何定义参考 [Miller Welds 焊接接头类型资料](https://www.millerwelds.com/-/media/miller-electric/files/pdf/articles/jointypes.pdf) 和 [AWS A2.4 焊接符号图表](https://app.aws.org/mwf/attachments/64/225364/AWSWeldSymbolchart.pdf)。
 
@@ -44,8 +66,12 @@
 index.html   页面结构
 style.css    样式
 app.js       焊缝示意与交互逻辑
+vision_algorithms.py  激光条纹预处理与特征提取算法
+requirements-vision.txt  图像算法依赖
+examples/run_vision_algorithms.py  单张图像运行示例
 ```
 
 ## License
 
 本项目采用 [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0)。仅允许非商业用途；商业使用需要另行取得许可。详见 [LICENSE](LICENSE)。
+
