@@ -30,6 +30,8 @@
 
 `vision_algorithms.py` 提供可直接调用的图像处理函数。它先按 ROI 裁剪并用高斯滤波降噪，再以逐列相对阈值生成激光条纹掩膜；随后用灰度重心法计算亚像素中心线，并通过连续性约束抑制跳点。
 
+详细原理、计算公式、参数含义和适用范围见 [算法原理说明](算法原理说明.md)。
+
 - `preprocess_laser_stripe`：灰度化、ROI、滤波和二值掩膜。
 - `extract_centerline`：沿图像列提取激光条纹亚像素中心线。
 - `detect_v_groove_bottom`：对 V 形两侧分段拟合直线，以交点作为坡口根部候选。
@@ -69,6 +71,7 @@ app.js       焊缝示意与交互逻辑
 vision_algorithms.py  激光条纹预处理与特征提取算法
 requirements-vision.txt  图像算法依赖
 examples/run_vision_algorithms.py  单张图像运行示例
+算法原理说明.md  处理流程、公式与使用边界
 ```
 
 ## License
